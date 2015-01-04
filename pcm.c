@@ -1298,3 +1298,14 @@ int pcm_ioctl(struct pcm *pcm, int request, ...)
 
     return ioctl(pcm->fd, request, arg);
 }
+
+unsigned int pcm_get_latency(struct pcm *pcm)
+{
+	snd_pcm_sframes_t frames = 0;
+
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DELAY, &frames) < 0) {
+		oops(pcm, errno, "cannot get delay");
+		return -1;
+	}
+	return (frames * 1000)/ (pcm->config.rate);
+}
